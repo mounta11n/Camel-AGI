@@ -1,43 +1,42 @@
 # Camel-AutoGPT
 
-You must have seen how powerful AI agents are with AutoGPT/BabyAGI ⚡️
+Sie müssen gesehen haben, wie mächtig KI-Agenten mit AutoGPT/BabyAGI sind.
 
-Imagine 2 of these agents interacting on a common goal🤯
+Stellen Sie sich vor, zwei dieser Agenten interagieren auf ein gemeinsames Ziel.
 
-Camel AutoGPT allows you to configure and deploy communicating Autonomous AI agents. Name your own custom AI characters and have them embark on any goal imaginable 🚀.
+Camel AutoGPT ermöglicht es Ihnen, kommunizierende autonome KI-Agenten zu konfigurieren und einzusetzen. Benennen Sie Ihre eigenen benutzerdefinierten KI-Charaktere und lassen Sie sie jedes erdenkliche Ziel verfolgen.
 
-### 🎉 Roadmap
+### Fahrplan
 
-* Share agents conversation 🔗
+* Teilen von Agentengesprächen
 
-* Saving agent runs 💾
+* Speichern von Agentenausführungen 
 
-* Prefixed instructor/assistant examples 🧠
+* Beispiele für Instruktoren/Assistenten mit Präfix 
 
-* Web browsing capabilities 🌐
+* Web-Browsing-Fähigkeiten 
 
-* Writing capabilities via a document API 📄
+* Schreibfähigkeiten über eine Dokument-API 
 
-* More Coming soon...
+* Mehr kommt bald...
 
-### Getting Started
+### Erste Schritte
 
-Code is up, ⭐ (Star) the repo to receive updates
+Der Code ist oben, markieren Sie das Repo um Updates zu erhalten
 
-Follow [Anil Chandra Naidu Matcha](https://twitter.com/matchaman11) & [Ankur Singh](https://twitter.com/ankur_maker) on twitter for updates
+Folgen Sie [Anil Chandra Naidu Matcha](https://twitter.com/matchaman11) & [Ankur Singh](https://twitter.com/ankur_maker) auf Twitter für Updates
 
-### How to run ?
+### Wie läuft man?
 
-Follow steps from here https://github.com/SamurAIGPT/Camel-AutoGPT/blob/main/steps_to_run.md
+Befolgen Sie die Schritte von hier https://github.com/SamurAIGPT/Camel-AutoGPT/blob/main/steps_to_run.md
 
-### References
+### Referenzen
 
 https://github.com/lightaime/camel
 
-### Demo link
 
+### Demo-Link
 https://camelagi.thesamur.ai/
 
-### Support
-
-Join our discord https://discord.gg/A6EzvsKX4u to get support
+### Unterstützung
+Treten Sie unserem Discord bei https://discord.gg/A6EzvsKX4u um Unterstützung zu bekommen.
