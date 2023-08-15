@@ -32,59 +32,85 @@ word_limit = 50 # word limit for task brainstorming
 rp = Blueprint('rp', __name__)
 
 
+# @rp.route("/rp/isLoggedIn", methods=['GET'])
+# def rp_isLoggedIn():
+#     url_host = urllib.parse.urlsplit(request.url).hostname
+#     if "5000" in request.url:
+#         redirect_uri = "http://"+url_host+":5000/rp/google_callback"
+#     else:    
+#         redirect_uri = "https://"+url_host+"/rp/google_callback"
+#     google = OAuth2Session(
+#         google_client_id, scope=scope, redirect_uri=redirect_uri)
+#     login_url, state = google.authorization_url(authorization_base_url)
+#     session['oauth_state'] = google_client_id
+#     if current_user.is_authenticated:
+#         if current_user.openai_key == "" or current_user.openai_key == None:
+#             keyAdded = None
+#         else:
+#             keyAdded = current_user.openai_key
+#         return jsonify(isLoggedIn=current_user.is_authenticated,userId=current_user.id,key_added=keyAdded,image=current_user.profile_image)
+#     else:
+#         return jsonify(isLoggedIn=False,auth_url=login_url)
 @rp.route("/rp/isLoggedIn", methods=['GET'])
 def rp_isLoggedIn():
-    url_host = urllib.parse.urlsplit(request.url).hostname
-    if "5000" in request.url:
-        redirect_uri = "http://"+url_host+":5000/rp/google_callback"
-    else:    
-        redirect_uri = "https://"+url_host+"/rp/google_callback"
-    google = OAuth2Session(
-        google_client_id, scope=scope, redirect_uri=redirect_uri)
-    login_url, state = google.authorization_url(authorization_base_url)
-    session['oauth_state'] = google_client_id
-    if current_user.is_authenticated:
-        if current_user.openai_key == "" or current_user.openai_key == None:
-            keyAdded = None
-        else:
-            keyAdded = current_user.openai_key
-        return jsonify(isLoggedIn=current_user.is_authenticated,userId=current_user.id,key_added=keyAdded,image=current_user.profile_image)
-    else:
-        return jsonify(isLoggedIn=False,auth_url=login_url)
-
-@rp.route("/rp/google_callback", methods=['GET'])
-def rp_google_callback():
-    url_host = urllib.parse.urlsplit(request.url).hostname
-    if "5000" in request.url:
-        redirect_uri = "http://"+url_host+":5000/rp/google_callback"
-    else:
-        redirect_uri = "https://"+url_host+"/rp/google_callback"
-    google = OAuth2Session(
-        google_client_id, scope=scope, redirect_uri=redirect_uri)
-    token_url = "https://www.googleapis.com/oauth2/v4/token"
-    welcome = False
-    try:
-        google.fetch_token(token_url, client_secret=google_client_secret,
-                        authorization_response=request.url)
-    except:
-        pass
-    response = google.get(
-        'https://www.googleapis.com/oauth2/v1/userinfo').json()
-    email = response["email"].lower()
-    googleId = str(response["id"])
-    name = response["name"]
-    image = response["picture"]
-    getAdmin = Admin.query.filter_by(email=email).first()
-    if getAdmin == None:
-        getAdmin = Admin(id=secrets.token_urlsafe(24), email=email,google_id=googleId, name=name,profile_image=image, created_date=datetime.now())
+    # Skip the whole OAuth process and just create a user directly.
+    if not current_user.is_authenticated:
+        getAdmin = Admin(id=secrets.token_urlsafe(24), email="test@example.com", name="Test User")
         db.session.add(getAdmin)
         db.session.commit()
+        login_user(getAdmin)
+
+    if current_user.openai_key == "" or current_user.openai_key == None:
+            keyAdded = None
     else:
-        getAdmin.google_id = googleId
-        getAdmin.profile_image = image
-        db.session.commit()
-    login_user(getAdmin, remember=True)
+            keyAdded = current_user.openai_key
+            
+    return jsonify(isLoggedIn=current_user.is_authenticated,
+                   userId=current_user.id,
+                   key_added=keyAdded,
+                   image=current_user.profile_image)
+
+
+
+# @rp.route("/rp/google_callback", methods=['GET'])
+# def rp_google_callback():
+#     url_host = urllib.parse.urlsplit(request.url).hostname
+#     if "5000" in request.url:
+#         redirect_uri = "http://"+url_host+":5000/rp/google_callback"
+#     else:
+#         redirect_uri = "https://"+url_host+"/rp/google_callback"
+#     google = OAuth2Session(
+#         google_client_id, scope=scope, redirect_uri=redirect_uri)
+#     token_url = "https://www.googleapis.com/oauth2/v4/token"
+#     welcome = False
+#     try:
+#         google.fetch_token(token_url, client_secret=google_client_secret,
+#                         authorization_response=request.url)
+#     except:
+#         pass
+#     response = google.get(
+#         'https://www.googleapis.com/oauth2/v1/userinfo').json()
+#     email = response["email"].lower()
+#     googleId = str(response["id"])
+#     name = response["name"]
+#     image = response["picture"]
+#     getAdmin = Admin.query.filter_by(email=email).first()
+#     if getAdmin == None:
+#         getAdmin = Admin(id=secrets.token_urlsafe(24), email=email,google_id=googleId, name=name,profile_image=image, created_date=datetime.now())
+#         db.session.add(getAdmin)
+#         db.session.commit()
+#     else:
+#         getAdmin.google_id = googleId
+#         getAdmin.profile_image = image
+#         db.session.commit()
+#     login_user(getAdmin, remember=True)
+#     return redirect("http://localhost:3000/")
+@rp.route("/rp/google_callback", methods=['GET'])
+def rp_google_callback():
+   # This route is no longer needed because we're skipping Google auth.
+
     return redirect("http://localhost:3000/")
+    pass 
 
 class CAMELAgent:
 
@@ -136,11 +162,11 @@ class CAMELAgent:
 
 
 def starting_convo(assistant_role_name,user_role_name,task):
-    task_specifier_sys_msg = SystemMessage(content="You can make a task more specific.")
+    task_specifier_sys_msg = SystemMessage(content="Sie können eine Aufgabe genauer machen.")
     task_specifier_prompt = (
-    """Here is a task that {assistant_role_name} will help {user_role_name} to complete: {task}.
-    Please make it more specific. Be creative and imaginative.
-    Please reply with the specified task in {word_limit} words or less. Do not add anything else."""
+    """Hier ist eine Aufgabe, die {Assistant_role_name} hilft, {user_role_name} zu vervollständigen: {Task}. 
+     Bitte machen Sie es genauer. Kreativ und einfallsreich sein. 
+     Bitte antworten Sie mit der angegebenen Aufgabe in {Word_Limit} -Wörtern oder weniger. Fügen Sie nichts anderes hinzu."""
     )
     task_specifier_template = HumanMessagePromptTemplate.from_template(template=task_specifier_prompt)
     task_specify_agent = CAMELAgent(task_specifier_sys_msg, ChatOpenAI(temperature=1.0),None)
@@ -152,53 +178,53 @@ def starting_convo(assistant_role_name,user_role_name,task):
     specified_task = specified_task_msg.content
 
     assistant_inception_prompt = (
-    """Never forget you are a {assistant_role_name} and I am a {user_role_name}. Never flip roles! Never instruct me!
-    We share a common interest in collaborating to successfully complete a task.
-    You must help me to complete the task.
-    Here is the task: {task}. Never forget our task!
-    I must instruct you based on your expertise and my needs to complete the task.
+    """Vergessen Sie niemals, dass Sie ein {assistant_role_name} sind und ich bin ein {user_role_name}. Niemals Rollen umdrehen! Weisen Sie mich niemals an! 
+     Wir haben ein gemeinsames Interesse an der Zusammenarbeit, um eine Aufgabe erfolgreich zu erledigen. 
+     Sie müssen mir helfen, die Aufgabe zu erledigen. 
+     Hier ist die Aufgabe: {Task}. Vergiss niemals unsere Aufgabe! 
+     Ich muss Sie anhand Ihres Fachwissens und meiner Bedürfnisse anweisen, die Aufgabe zu erledigen. 
 
-    I must give you one instruction at a time.
-    You must write a specific solution that appropriately completes the requested instruction.
-    You must decline my instruction honestly if you cannot perform the instruction due to physical, moral, legal reasons or your capability and explain the reasons.
-    Do not add anything else other than your solution to my instruction.
-    You are never supposed to ask me any questions you only answer questions.
-    You are never supposed to reply with a flake solution. Explain your solutions.
-    Your solution must be declarative sentences and simple present tense.
-    Unless I say the task is completed, you should always start with:
+     Ich muss Ihnen jeweils eine Anweisung geben. 
+     Sie müssen eine bestimmte Lösung schreiben, die die angeforderte Anweisung angemessen abschließt. 
+     Sie müssen meine Anweisung ehrlich ablehnen, wenn Sie die Anweisung aus physischen, moralischen, rechtlichen Gründen oder Ihrer Fähigkeit nicht ausführen und die Gründe erklären können. 
+     Fügen Sie meiner Anweisung nichts anderes als Ihre Lösung hinzu. 
+     Sie sollen mir niemals Fragen stellen, die Sie nur Fragen beantworten. 
+     Sie sollen niemals mit einer Flockenlösung antworten. Erklären Sie Ihre Lösungen. 
+     Ihre Lösung muss deklarative Sätze und eine einfache Gegenwart sein. 
+     Wenn ich nicht sage, dass die Aufgabe erledigt ist, sollten Sie immer beginnen mit:
 
-    Solution: <YOUR_SOLUTION>
+    Lösung: <YOUR_SOLUTION>
 
-    <YOUR_SOLUTION> should be specific and provide preferable implementations and examples for task-solving.
-    Always end <YOUR_SOLUTION> with: Next request."""
+    <YOUR_SOLUTION> sollte spezifisch sein und bevorzugte Implementierungen und Beispiele für die Aufgabenlösung bereitstellen.
+    Beende immer deine <YOUR_SOLUTION> mit: Nächste Anfrage."""
     )
 
     user_inception_prompt = (
-    """Never forget you are a {user_role_name} and I am a {assistant_role_name}. Never flip roles! You will always instruct me.
-    We share a common interest in collaborating to successfully complete a task.
-    I must help you to complete the task.
-    Here is the task: {task}. Never forget our task!
-    You must instruct me based on my expertise and your needs to complete the task ONLY in the following two ways:
+    """Vergessen Sie niemals, dass Sie ein {user_role_name} sind und ich bin ein {assistant_role_name}. Niemals Rollen umdrehen! Sie werden mich immer anweisen. 
+     Wir haben ein gemeinsames Interesse an der Zusammenarbeit, um eine Aufgabe erfolgreich zu erledigen. 
+     Ich muss Ihnen helfen, die Aufgabe zu erledigen. 
+     Hier ist die Aufgabe: {Task}. Vergiss niemals unsere Aufgabe! 
+     Sie müssen mich anhand meines Fachwissens und Ihren Bedürfnissen anweisen, die Aufgabe nur auf die folgenden Arten zu erledigen:
 
-    1. Instruct with a necessary input:
-    Instruction: <YOUR_INSTRUCTION>
-    Input: <YOUR_INPUT>
+    1. Instruieren Sie eine erforderliche Eingabe:
+    Instruktion: <YOUR_INSTRUCTION>
+    Eingabe: <YOUR_INPUT>
 
-    2. Instruct without any input:
-    Instruction: <YOUR_INSTRUCTION>
+    2. Ohne Eingabe instruieren:
+    Instruktion: <YOUR_INSTRUCTION>
     Input: None
 
-    The "Instruction" describes a task or question. The paired "Input" provides further context or information for the requested "Instruction".
+    Die "Instruktion" beschreibt eine Aufgabe oder Frage. Die gepaarte "Eingabe" bietet einen weiteren Kontext oder Informationen für die angeforderte "Anweisung".
 
-    You must give me one instruction at a time.
-    I must write a response that appropriately completes the requested instruction.
-    I must decline your instruction honestly if I cannot perform the instruction due to physical, moral, legal reasons or my capability and explain the reasons.
-    You should instruct me not ask me questions.
-    Now you must start to instruct me using the two ways described above.
-    Do not add anything else other than your instruction and the optional corresponding input!
-    Keep giving me instructions and necessary inputs until you think the task is completed.
-    When the task is completed, you must only reply with a single word <CAMEL_TASK_DONE>.
-    Never say <CAMEL_TASK_DONE> unless my responses have solved your task."""
+    Sie müssen mir jeweils eine Anweisung geben. 
+    Ich muss eine Antwort schreiben, die die angeforderte Anweisung angemessen abschließt. 
+    Ich muss Ihre Anweisung ehrlich ablehnen, wenn ich die Anweisung aus physischen, moralischen, rechtlichen Gründen oder meiner Fähigkeit nicht ausführen und die Gründe erklären kann. 
+    Sie sollten mich anweisen, mir keine Fragen zu stellen. 
+    Jetzt müssen Sie anfangen, mich mit den beiden oben beschriebenen Arten zu unterweisen. 
+    Fügen Sie nichts anderes als Ihre Anweisung und die optionale entsprechende Eingabe hinzu! 
+    Geben Sie mir weiterhin Anweisungen und notwendige Eingaben, bis Sie der Meinung sind, dass die Aufgabe erledigt ist.
+    Wenn die Aufgabe abgeschlossen ist, müssen Sie nur mit einem einzigen Wort antworten <CAMEL_TASK_DONE>.
+    Sage niemals <CAMEL_TASK_DONE>, es sei denn, meine Antworten haben Ihre Aufgabe gelöst."""
     )
     return specified_task,assistant_inception_prompt,user_inception_prompt
 
@@ -236,8 +262,8 @@ def start_rp():
         # Initialize chats 
         assistant_msg = HumanMessage(
             content=(f"{user_sys_msg.content}. "
-                        "Now start to give me introductions one by one. "
-                        "Only reply with Instruction and Input."))
+                        "Geben Sie mir nun Einführungen nacheinander. "
+                        "Antworten Sie nur mit der Instruktion und der Eingabe."))
 
         user_msg = HumanMessage(content=f"{assistant_sys_msg.content}")
         user_msg = assistant_agent.step(user_msg)
@@ -255,11 +281,11 @@ def start_rp():
         # n += 1
     user_ai_msg = user_agent.step(assistant_msg)
     user_msg = HumanMessage(content=user_ai_msg.content)
-    userMsg = user_msg.content.replace("Instruction: ","").replace("Input: None","").replace("Input: None.","")
+    userMsg = user_msg.content.replace("Instruktion: ","").replace("Eingabe: None","").replace("Eingabe: None.","")
     # print(f"AI User ({user_role_name}):\n\n{user_msg.content}\n\n")
     assistant_ai_msg = assistant_agent.step(user_msg)
     assistant_msg = HumanMessage(content=assistant_ai_msg.content)
-    assistantMsg = assistant_msg.content.replace("Solution: ","").replace("Next request.","")
+    assistantMsg = assistant_msg.content.replace("Lösung: ","").replace("Nächste Anfrage.","")
     # print(f"AI Assistant ({assistant_role_name}):\n\n{assistant_msg.content}\n\n")
     convoEnd = False
     if "<CAMEL_TASK_DONE>" in user_msg.content:
@@ -280,7 +306,7 @@ def rp_get_chat():
     messages = []
     for store in assistant_store[2:]:
         if str(type(store)) == "<class 'langchain.schema.HumanMessage'>":
-            messages.append({"role":0,"msg":store.content.replace("Instruction: ","").replace("Input: None","").replace("Input: None.","")})
+            messages.append({"role":0,"msg":store.content.replace("Instruktion: ","").replace("Eingabe: None","").replace("Eingabe: None.","")})
         elif str(type(store)) == "<class 'langchain.schema.AIMessage'>":
-            messages.append({"role":1,"msg":store.content.replace("Solution: ","").replace("Next request.","")})
+            messages.append({"role":1,"msg":store.content.replace("Lösung: ","").replace("Nächste Anfrage.","")})
     return jsonify(role1=getSession.role_1,role2=getSession.role_2,task=getSession.task,messages=messages)

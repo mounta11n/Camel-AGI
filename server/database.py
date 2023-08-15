@@ -36,7 +36,7 @@ class Admin(UserMixin,db.Model):
     profile_image = db.Column(db.String(100000))
     password = db.Column(db.String(100))
     created_date = db.Column(DateTime)
-    gpt_model = db.Column(db.String, default="gpt-3.5-turbo", server_default="gpt-3.5-turbo")
+    gpt_model = db.Column(db.String, default="gpt-4-0613", server_default="gpt-4-0613")
     agent_sessions = db.relationship('Agent_Session', backref='admin',
                                       cascade="all,delete", lazy='dynamic')                                      
     def get_id(self):

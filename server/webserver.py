@@ -44,7 +44,7 @@ def change_model():
     model = request.values["model"]
     current_user.gpt_model = model
     db.session.commit()
-    return "Success"
+    return "Erfolgreich"
 
 @app.route("/logout", methods=['GET'])
 def logout():
@@ -63,4 +63,4 @@ def store_key():
         return jsonify(False), 400      
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=False)

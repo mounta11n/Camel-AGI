@@ -19,7 +19,7 @@
     padding: 0 !important;
 }
 
-.bubble {
+/* .bubble {
     --r: 12px; 
     --t: 10px; 
 
@@ -33,7 +33,43 @@
         0 0/var(--r) var(--r) space padding-box;
     
     color: #fff;
+} */
+
+/* .bubble {
+    --r: 12px; 
+    --t: 10px; 
+
+    padding: calc(2*var(--r)/3);
+    -webkit-mask: 
+        radial-gradient(closest-side at var(--_d) ,#0000 98%,#000 102%) 
+        var(--_d) 100%/calc(100% - var(--r)) var(--t) no-repeat,
+        conic-gradient(at var(--r) var(--r),#000 75%,#0000 0) 
+        calc(var(--r)/-2) calc(var(--r)/-2) padding-box, 
+        radial-gradient(closest-side,#000 98%,#0000 101%) 
+        closest-side/closest-corner space padding-box;
+    
+    color: #fff;
+} */
+
+/* Die Warnung, die Sie erhalten, bezieht sich auf den Einsatz der -webkit-mask Eigenschaft in Ihrem CSS-Code. Diese Eigenschaft ist ein spezifischer Präfix für Webkit-basierte Browser wie Chrome und Safari und wird nicht von allen Browsern unterstützt.
+Um diese Warnung zu vermeiden, können wir versuchen, die Standard mask Eigenschaft anstelle des -webkit-mask Präfixes zu verwenden. Allerdings sollten Sie beachten, dass das Verhalten zwischen diesen beiden möglicherweise unterschiedlich ist und es immer noch einige Kompatibilitätsprobleme mit bestimmten Browsern geben kann.
+Hier ist Ihr umgeschriebener Code: */
+.bubble {
+    --r: 12px; 
+    --t: 10px; 
+
+    padding: calc(2*var(--r)/3);
+    mask:
+        radial-gradient(closest-side at var(--_d) ,#0000 98%,#0f0 102%) 
+        var(--_d) 100%/calc(100% - var(--r)) var(--t) no-repeat,
+        conic-gradient(at var(--r) var(--r),#000 75%,#00f 0)
+        calc(var(--r)/-2) calc(var(--r)/-2),
+        radial-gradient(closest-side,#f00 98%,#0ff 101%) 
+        closest-side/closest-corner space;
+
+    color: #fff;
 }
+
 .agent-1-chat {
     --_d: 0%;
     border-left: var(--t) solid #0000;
@@ -43,10 +79,10 @@
 }
 .agent-2-chat {
     --_d: 100%;
-    border-right: var(--t) solid #0000;
+    border-right: var(--t) solid #000;
     margin-left: var(--t);
     box-shadow: 10px 10px 40px #2b2d2f;
-    background: #3f65f9 border-box;
+    background: #5e81ac border-box;
 }
 .agent-chat-icon{
     min-width: 2.5rem;
@@ -57,15 +93,15 @@
 }
 .continue-button{
     background-color: #eee !important;
-    color: #000 !important;
+    color: #2b2d2f !important;
     border: none !important;
     border-radius: 12px !important;
     /* font-size: 12px !important; */
     font-weight: 800 !important;
 }
 .agent-input{
-    background-color: transparent !important;
-    color: #fff !important;
+    background-color: #fff;
+    color: #2b2d2f !important;
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
